@@ -24,6 +24,9 @@ public class Game {
     private int cardBitmapWidth;
     private Bitmap cardFrontBitmap;
     private Bitmap cardBackBitmap;
+    private String trump;
+    private Player attacker;
+    private Player defender;
 
     public Game(Context context) {
         this.context = context;
@@ -33,6 +36,7 @@ public class Game {
         int scale = height/width;
         initializeDeck();
 
+        // TODO Refactor
         for(Card c : deck) {
 //          Log.d("deck", "Rank: " + c.getRank() + " , Suit: " + c.getSuit() + " , Sizes: " + width + " " + height);
             String path =  c.getSuit() + String.valueOf(c.getRank());
@@ -61,6 +65,7 @@ public class Game {
         Card lastCard = deck.get(deck.size()-1);
         deck.get(0).rotateBitmap(90);
         lastCard.flip();
+        trump = lastCard.getSuit();
         lastCard.setX(lastCard.getX() + (lastCard.getCurrentBitmap().getHeight() - lastCard.getCurrentBitmap().getWidth())/2);
     }
 

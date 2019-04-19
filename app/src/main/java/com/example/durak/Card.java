@@ -13,6 +13,7 @@ public class Card {
     private String suit;
     private int rank;
     private boolean faceup;
+    private boolean selected;
     private Bitmap cardFront;
     private Bitmap cardBack;
 
