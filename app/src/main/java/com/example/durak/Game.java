@@ -16,6 +16,7 @@ public class Game {
     private Context context;
     private GameView gameView;
     private ArrayList<Card> deck = new ArrayList<>();
+    private ArrayList<Card> field = new ArrayList<>();
     private int height;
     private int width;
     private ArrayList<Player> players = new ArrayList<>();
@@ -27,6 +28,8 @@ public class Game {
     private String trump;
     private Player attacker;
     private Player defender;
+    private int fieldX;
+    private int fieldY;
 
     public Game(Context context) {
         this.context = context;
@@ -34,6 +37,8 @@ public class Game {
 
     public void newGame() {
         int scale = height/width;
+        fieldX = width/2;
+        fieldY = height/2;
         initializeDeck();
 
         // TODO Refactor
@@ -59,7 +64,7 @@ public class Game {
         Collections.shuffle(deck);
         initializePlayers(numberOfPlayers);
         for(Player player : players) {
-            transferCards(6, player);
+            transferCardsToPlayer(6, player);
         }
 
         Card lastCard = deck.get(deck.size()-1);
@@ -67,6 +72,36 @@ public class Game {
         lastCard.flip();
         trump = lastCard.getSuit();
         lastCard.setX(lastCard.getX() + (lastCard.getCurrentBitmap().getHeight() - lastCard.getCurrentBitmap().getWidth())/2);
+    }
+    public void attack(Player player, Card card){
+
+    }
+
+    public void transferCardToField(Player player, Card card) {
+        if(player.isHuman()){
+            card.setFaceup(true);
+            field.add(card);
+            Log.d("test", "Field X: " + fieldX + " Field Y: " + fieldY);
+
+            for(int i=0;i<field.size();i++) {
+                if(i<3) {
+                    card.setX(fieldX - cardBitmapWidth * (1 - i) - (cardBitmapWidth / 2) * (2 - i));
+                    card.setY(fieldY - cardBitmapHeight - cardBitmapHeight/2);
+                    Log.d("test", "Card X: " + fieldX + " Card Y: " + fieldY);
+                } else {
+                    card.setX(fieldX - cardBitmapWidth * (4 - i) - (cardBitmapWidth / 2) * (5 - i));
+                    card.setY(fieldY + cardBitmapHeight/2);
+                    Log.d("test", "Card X: " + fieldX + " Card Y: " + fieldY);
+
+                    //Log.d("test", "Card X: " + card.getY() + " Card Y: " + card.getY());
+                }
+            }
+            for(Card c : field) {
+                Log.d("test", "Card X "+c.getX());
+            }
+            player.getHand().remove(card);
+            gameView.invalidate();
+        }
     }
 
     public void initializeDeck() {
@@ -88,8 +123,8 @@ public class Game {
                 break;
         }
     }
-
-    public void transferCards(int numberOfCards, Player player) {
+    // TODO Add transferToField method, rename transferCards to transferToPlayer
+    public void transferCardsToPlayer(int numberOfCards, Player player) {
         for(int i = 0; i < numberOfCards; i++) {
             switch (player.getPosition()){
                 case 0:
@@ -138,4 +173,7 @@ public class Game {
     public int getHeight() { return height; }
     public void setHeight(int height) { this.height = height; }
 
+    public ArrayList<Card> getField() {
+        return field;
+    }
 }

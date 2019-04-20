@@ -49,6 +49,10 @@ public class GameView extends View {
         canvas.drawBitmap(lastCard.getCurrentBitmap(), lastCard.getX(), lastCard.getY(), paint);
         canvas.drawBitmap(firstCard.getCurrentBitmap(), firstCard.getX(), firstCard.getY(), paint);
 
+        for(Card cardOnField : game.getField()){
+            canvas.drawBitmap(cardOnField.getCurrentBitmap(), cardOnField.getX(), cardOnField.getY(), paint);
+        }
+
         for(Player player : game.getPlayers()) {
             for(Card card : player.getHand()) {
 //                Log.d("deck", "Card: " + card.getX() + " " + card.getY());

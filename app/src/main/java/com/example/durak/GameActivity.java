@@ -22,6 +22,7 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         gameView = findViewById(R.id.gameView);
+        // TODO Clicking on cards left to right does not add them to the field
         gameView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -34,6 +35,11 @@ public class GameActivity extends AppCompatActivity {
                                 event.getY() > card.getY() &&
                                 event.getY() < card.getY() + card.getCurrentBitmap().getHeight()
                         ) {
+                            if(card == selected) {
+                                game.transferCardToField(game.getPlayers().get(0), card);
+                                selected = null;
+                                break;
+                            }
                             if (selected != null) {
                                 selected.setY(selected.getY() + selected.getCurrentBitmap().getHeight() / 2);
                             }
