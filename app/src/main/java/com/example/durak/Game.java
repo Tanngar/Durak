@@ -6,16 +6,12 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -44,6 +40,7 @@ public class Game {
     private Button takeButton;
     private TextView gameOverMessage;
     private Dialog menuPopup;
+    private Card selected;
 
     public Game(Context context, Button passButton, Button takeButton, TextView gameOverMessage, Dialog menuPopup) {
         this.context = context;
@@ -58,7 +55,7 @@ public class Game {
         fieldX = width / 2;
         fieldY = height / 2 + height / 10;
 
-        gameOverMessage.setText(" ");
+        gameOverMessage.setText("MENU");
         deck.clear();
         field.clear();
         initializeDeck();
@@ -67,8 +64,10 @@ public class Game {
         for (Card c : deck) {
             String path = c.getSuit() + String.valueOf(c.getRank());
             Resources resources = context.getResources();
+
             Bitmap originalCardBackBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.purple_back);
             Bitmap originalCardFrontBitmap = BitmapFactory.decodeResource(resources, resources.getIdentifier(path, "drawable", context.getPackageName()));
+
             cardBitmapHeight = originalCardFrontBitmap.getHeight() * 2 / 5 * scale;
             cardBitmapWidth = originalCardFrontBitmap.getWidth() * 2 / 5 * scale;
 
@@ -87,29 +86,27 @@ public class Game {
         players.clear();
         initializePlayers(numberOfPlayers);
         Random random = new Random();
-        int randomPlayerIndex =random.nextInt(players.size());
+        int randomPlayerIndex = random.nextInt(players.size());
         currentPlayer = players.get(randomPlayerIndex);
         attacker = currentPlayer;
 
-        for(int i = 0; i < players.size(); i++) {
-            if(i != randomPlayerIndex) {
+        for (int i = 0; i < players.size(); i++) {
+            if (i != randomPlayerIndex) {
                 defender = players.get(i);
             }
         }
 
         for (Player player : players) {
-            transferCardsToPlayer(6, player);
+            transferCardsFromDeckToPlayer(6, player);
         }
 
         Card lastCard = deck.get(deck.size() - 1);
         lastCard.flip();
         trump = lastCard.getSuit();
-        // assign values to cards
         for (Card card : deck) {
             if (card.getSuit() == trump) {
                 card.setValue(card.getValue() + 10);
             }
-            Log.d("AI", card.getSuit() + card.getRank() + " has value of: " + card.getValue());
         }
         lastCard.setX(lastCard.getX() + (lastCard.getCurrentBitmap().getHeight() - lastCard.getCurrentBitmap().getWidth()) / 2);
         if (currentPlayer == players.get(1)) {
@@ -118,20 +115,66 @@ public class Game {
         toggleButtons();
     }
 
-    public void cardOnClick(int eventX, int eventY){
-
+    public void initializePlayers(int numberOfPlayers) {
+        switch (numberOfPlayers) {
+            case 2:
+                players.add(new Player(width / 2, height - cardBitmapHeight, true, 0));
+                players.add(new Player(width / 2, 0, false, 3));
+                break;
+        }
     }
+
+    public void cardOnClick(float eventX, float eventY) {
+        if (selected != null &&
+                eventX > selected.getX() &&
+                eventX < selected.getX() + selected.getCurrentBitmap().getWidth() &&
+                eventY > selected.getY() &&
+                eventY < selected.getY() + selected.getCurrentBitmap().getHeight()
+        ) {
+            if (moveIsValid(getCurrentPlayer(), selected)) {
+                transferCardToField(getCurrentPlayer(), selected);
+                setCurrentCard(selected);
+                swapCurrentPlayer();
+                selected = null;
+            } else {
+                selected.setY(selected.getY() + selected.getCurrentBitmap().getHeight() / 2);
+                selected = null;
+            }
+        }
+        ArrayList<Card> hand = getPlayers().get(0).getHand();
+        for (int i = hand.size() - 1; i >= 0; i--) {
+            Card card = hand.get(i);
+
+            if (eventX > card.getX() &&
+                    eventX < card.getX() + card.getCurrentBitmap().getWidth() &&
+                    eventY > card.getY() &&
+                    eventY < card.getY() + card.getCurrentBitmap().getHeight()
+            ) {
+                if (selected != null) {
+                    selected.setY(selected.getY() + selected.getCurrentBitmap().getHeight() / 2);
+                }
+
+                selected = card;
+                card.setY(card.getY() - card.getCurrentBitmap().getHeight() / 2);
+                break;
+            } else {
+                if (selected != null) {
+                    selected.setY(selected.getY() + selected.getCurrentBitmap().getHeight() / 2);
+                    selected = null;
+                }
+            }
+        }
+        gameView.invalidate();
+    };
 
     public boolean moveIsValid(Player player, Card card) {
         if (player != currentPlayer) {
             return false;
         }
-
         if (player == attacker) {
             if (field.size() == 0) {
                 return true;
             }
-
             for (Card cardOnField : field) {
                 if (cardOnField.getRank() == card.getRank()) {
                     return true;
@@ -139,14 +182,13 @@ public class Game {
             }
             return false;
         }
-
         if (player == defender) {
             if (card.getSuit() == trump) {
                 card.setValue(card.getRank());
                 card.setValue(card.getValue() + 10);
-                if(currentCard.getSuit() == trump) {
+                if (currentCard.getSuit() == trump) {
                     currentCard.setValue(currentCard.getRank());
-                    currentCard.setValue(currentCard.getValue()+10);
+                    currentCard.setValue(currentCard.getValue() + 10);
                 }
                 if (card.getValue() > currentCard.getValue()) {
                     return true;
@@ -174,11 +216,12 @@ public class Game {
         swapAttackerAndDefender();
         swapCurrentPlayer();
         if (attacker.getHand().size() < 6) {
-            transferCardsToPlayer(6 - attacker.getHand().size(), attacker);
+            transferCardsFromDeckToPlayer(6 - attacker.getHand().size(), attacker);
         }
         if (defender.getHand().size() < 6) {
-            transferCardsToPlayer(6 - defender.getHand().size(), defender);
+            transferCardsFromDeckToPlayer(6 - defender.getHand().size(), defender);
         }
+        selected = null;
         gameView.invalidate();
     }
 
@@ -193,9 +236,10 @@ public class Game {
         transferCardsFromFieldToPlayer(currentPlayer);
         field.clear();
         if (attacker.getHand().size() < 6) {
-            transferCardsToPlayer(6 - attacker.getHand().size(), attacker);
+            transferCardsFromDeckToPlayer(6 - attacker.getHand().size(), attacker);
         }
         swapCurrentPlayer();
+        selected = null;
         gameView.invalidate();
     }
 
@@ -218,14 +262,10 @@ public class Game {
                     }
                 }
             }
-
             if (lowestValueCard == null) {
-                Log.d("AI", "Pass");
                 pass();
                 return;
-
             } else {
-                Log.d("AI", "Defend this bitch");
                 transferCardToField(player, lowestValueCard);
                 setCurrentCard(lowestValueCard);
                 swapCurrentPlayer();
@@ -238,10 +278,8 @@ public class Game {
                 if (card.getSuit() == trump) {
                     card.setValue(card.getValue() + 10);
                 }
-
                 if (card.getSuit() != trump) {
                 }
-
                 int currentValue;
                 if (moveIsValid(player, card)) {
                     currentValue = card.getValue();
@@ -251,13 +289,10 @@ public class Game {
                     }
                 }
             }
-
             if (lowestValueCard == null) {
-                Log.d("AI", "Take");
                 take();
                 return;
             } else {
-                Log.d("AI", "Keep attacking");
                 transferCardToField(player, lowestValueCard);
                 setCurrentCard(lowestValueCard);
                 swapCurrentPlayer();
@@ -275,21 +310,17 @@ public class Game {
         for (int i = 0; i < field.size(); i++) {
             if (i < 6) {
                 if ((i % 2) == 0) { // even
-                    Log.d("odd", "Even");
                     card.setX(fieldX - (cardBitmapWidth / 4 * (8 - 3 * i)));
                     card.setY(fieldY - cardBitmapWidth / 4 - cardBitmapHeight);
                 } else { // odd
-                    Log.d("odd", "Odd");
                     card.setX(fieldX - (cardBitmapWidth / 4 * (10 - i * 3)));
                     card.setY(fieldY - cardBitmapHeight);
                 }
             } else {
                 if ((i % 2) == 0) { // even
-                    Log.d("odd", "Even");
                     card.setX(fieldX - (cardBitmapWidth / 4 * (8 - 3 * (i - 6))));
                     card.setY(fieldY + cardBitmapWidth / 4);
                 } else { // odd
-                    Log.d("odd", "Odd");
                     card.setX(fieldX - (cardBitmapWidth / 4 * (10 - (i - 6) * 3)));
                     card.setY(fieldY + cardBitmapWidth / 2);
                 }
@@ -311,15 +342,6 @@ public class Game {
         }
     }
 
-    public void initializePlayers(int numberOfPlayers) {
-        switch (numberOfPlayers) {
-            case 2:
-                players.add(new Player(width / 2, height - cardBitmapHeight, true, 0));
-                players.add(new Player(width / 2, 0, false, 3));
-                break;
-        }
-    }
-
     public void transferCardsFromFieldToPlayer(Player player) {
         for (int i = 0; i < field.size(); i++) {
             if (!player.isHuman()) {
@@ -331,16 +353,18 @@ public class Game {
         fanCards(player);
     }
 
-    public void transferCardsToPlayer(int numberOfCards, Player player) {
+    public void transferCardsFromDeckToPlayer(int numberOfCards, Player player) {
+        // stop method if deck is empty
         if (deck.size() == 0) {
             return;
         }
+        // if there less cards in deck
         if (deck.size() < numberOfCards) {
             numberOfCards = deck.size();
         }
         for (int i = 0; i < numberOfCards; i++) {
-            Log.d("AI", deck.size() + " - deck size");
             if (deck.size() <= numberOfCards) {
+                deck.get(deck.size() - 1).flip();
                 deck.get(deck.size() - 1).rotateBitmap(-90);
             }
 
@@ -369,6 +393,22 @@ public class Game {
         defender = initialAttacker;
     }
 
+    public void swapCurrentPlayer() {
+        checkWinCondition();
+        if (field.size() == 12) {
+            pass();
+        }
+        if (currentPlayer == players.get(0)) {
+            currentPlayer = players.get(1);
+        } else {
+            currentPlayer = players.get(0);
+        }
+        if (!currentPlayer.isHuman()) {
+            easyComputerTurn(currentPlayer);
+        }
+        toggleButtons();
+    }
+
     public void toggleButtons() {
         passButton.setClickable(false);
         takeButton.setClickable(false);
@@ -388,34 +428,13 @@ public class Game {
         }
     }
 
-    public void swapCurrentPlayer() {
-        checkWinCondition();
-        if (field.size() == 12) {
-            pass();
-        }
-        if (currentPlayer == players.get(0)) {
-            currentPlayer = players.get(1);
-        } else {
-            currentPlayer = players.get(0);
-        }
-        if (!currentPlayer.isHuman()) {
-            easyComputerTurn(currentPlayer);
-        }
-        toggleButtons();
-    }
-
     public void fanCards(Player player) {
         ArrayList<Card> hand = player.getHand();
         if (hand.size() > 0) {
-            // Set X for the first card
             hand.get(0).setX(width / 2 - ((hand.size() - 1) * (cardBitmapWidth / 4) + cardBitmapWidth) / 2);
-
-            // Set Y
             for (Card card : hand) {
                 card.setY(player.getY());
             }
-
-            // Set X for the rest of the cards based on X of first card
             for (int i = 1; i < hand.size(); i++) {
                 hand.get(i).setX(hand.get(i - 1).getX() + cardBitmapWidth / 4);
             }
