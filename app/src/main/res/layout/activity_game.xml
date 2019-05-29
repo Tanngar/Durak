@@ -1,8 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
+    <Button
+        android:clickable="false"
+        android:background="#4f4f4f"
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:id="@+id/pass"
+        android:text="@string/pass"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="100dp"
+        android:layout_marginRight="10dp"
+        android:onClick="onClickPass"
+
+        />
+    <Button
+        android:clickable="false"
+        android:background="#4f4f4f"
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:id="@+id/take"
+        android:text="@string/take"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="160dp"
+        android:layout_marginRight="10dp"
+        android:onClick="onClickTake"
+        />
+
+    <Button
+        android:background="#c60b3a"
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:id="@+id/menu"
+        android:text="@string/menu"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="220dp"
+        android:layout_marginRight="10dp"
+        />
 
     <com.example.durak.GameView
         android:id="@+id/gameView"
@@ -10,4 +49,5 @@
         android:layout_height="match_parent">
     </com.example.durak.GameView>
 
-</LinearLayout>
+
+</RelativeLayout>

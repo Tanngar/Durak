@@ -12,6 +12,7 @@ public class Card {
     private Bitmap currentBitmap;
     private String suit;
     private int rank;
+    private int value;
     private boolean faceup;
     private boolean selected;
     private Bitmap cardFront;
@@ -21,6 +22,7 @@ public class Card {
         this.suit = suit;
         this.rank = rank;
         this.faceup = false;
+        this.value = rank;
     }
 
     public int getRank() { return rank; }
@@ -43,6 +45,14 @@ public class Card {
 
     public boolean getFaceup() { return faceup; }
     public void setFaceup(boolean faceup) { this.faceup = faceup; }
+
+    public int getValue() {
+        return value;
+    }
+
+    public void setValue(int value) {
+        this.value = value;
+    }
 
     public void flip() {
         if(currentBitmap == cardFront) {

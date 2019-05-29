@@ -3,4 +3,40 @@
     <string name="newGame">New game</string>
     <string name="rules">Rules</string>
     <string name="settings">Settings</string>
+    <string name="pass">PASS</string>
+    <string name="take">TAKE</string>
+    <string name="menu">MENU</string>
+    <string name="quit">Quit</string>
+    <string name="back">Back</string>
+    <string name="gamePlayRules">
+        Game Play\n
+        1.	The game consists of a series of attacks (where players get a chance to get rid of cards) and defenses (where players are threatened with having to add cards to their hand unless of course they are succesful in defending themselves).\n
+        2.	Each player gets a turn to defend himself.\n
+        3.	The first attacker is picked randomly.\n
+        4.	Players are dealt 6 cards each. After the players have received all their cards, the bottom card of the deck is revealed. This card represents the trump suit and is now at the bottom of the deck. Cards in this suit hold a higher value then the Aces of the other suits. Within the trump suit card hierarchy is maintained. \n
+    </string>
+    <string name="attackingRules">
+        Attacking\n
+        1.	Attacker reveals a card from his hand by placing it on the table so all can see. \n
+        2.	After the first card has been defended attacker may add card to the table as long as they are of the same face value as other cards in play.\n
+        3.	Maximum cards to be defended must be not greater than 6 or until the defender runs out of cards, whichever is less.\n
+    </string>
+    <string name="defendingRules">
+        Defending\n
+        1.	Defender must respond to the revealed card by beating it with a card of the same suit of higher value or a card of the trump suit. \n
+        2.	If the defender has no appropriate card he must pick up the card and add it to his hand, thereby losing his turn to attack. If the defender picks up the first attacking card, the turn is over.\n
+        3.	Defender must beat all revealed cards. Otherwise he must pick all cards in play including ones that have been beaten. \n
+        4.	A successful turn ends when the defender beats all attacking cards. All cards that have been revealed during this turn are removed from the game.\n
+    </string>
+    <string name="endOfTurnRules">
+        End of Turn\n
+        1.	When a defender has successfully beaten all the attacking cards, all the cards that have been in play are removed from the game.\n
+        2.	Every player must take his turn to refresh his hand by taking as many cards from deck as needed to bring his hand to a total of 6. The original attacker refreshes his hand first. Defender refreshes his hand last. \n
+        3.	If the deck has been exhausted, players who are left empty handed withdraw from the game. They are lucky, for they will not have a chance to lose.\n
+        4.	The player who completed a successful defence becomes the next attacker against the player to his left. If the defender was not successful, the player to his left becomes the attacker. \n
+    </string>
+    <string name="endGameRules">
+        Endgame\n
+        The endgame begins as soon as the deck is exhausted and there are no more cards to refresh one\'s hand. As cards are eliminated, strategy becomes much more important than luck. The game continues, until one player remains with cards in hand. That player loses the game and becomes the Durak. \n
+    </string>
 </resources>

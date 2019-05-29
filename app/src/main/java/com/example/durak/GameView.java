@@ -1,12 +1,15 @@
 package com.example.durak;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
 public class GameView extends View {
     private Game game;
@@ -40,14 +43,16 @@ public class GameView extends View {
             gameInitiliazed = true;
             game.newGame();
         }
+
         Paint paint = new Paint();
-        canvas.drawColor(Color.BLACK);
+        canvas.drawColor(Color.parseColor("#033b32"));
 
-        Card firstCard = game.getDeck().get(0);
-        Card lastCard = game.getDeck().get(game.getDeck().size()-1);
-
-        canvas.drawBitmap(lastCard.getCurrentBitmap(), lastCard.getX(), lastCard.getY(), paint);
-        canvas.drawBitmap(firstCard.getCurrentBitmap(), firstCard.getX(), firstCard.getY(), paint);
+        if(game.getDeck().size()>0){
+            Card firstCard = game.getDeck().get(0);
+            Card lastCard = game.getDeck().get(game.getDeck().size()-1);
+            canvas.drawBitmap(lastCard.getCurrentBitmap(), lastCard.getX(), lastCard.getY(), paint);
+            canvas.drawBitmap(firstCard.getCurrentBitmap(), firstCard.getX(), firstCard.getY(), paint);
+        }
 
         for(Card cardOnField : game.getField()){
             canvas.drawBitmap(cardOnField.getCurrentBitmap(), cardOnField.getX(), cardOnField.getY(), paint);
@@ -55,7 +60,6 @@ public class GameView extends View {
 
         for(Player player : game.getPlayers()) {
             for(Card card : player.getHand()) {
-//                Log.d("deck", "Card: " + card.getX() + " " + card.getY());
                 canvas.drawBitmap(card.getCurrentBitmap(), card.getX(), card.getY(), paint);
             }
         }
@@ -63,6 +67,7 @@ public class GameView extends View {
 
         super.onDraw(canvas);
     }
+
 
     public void setGame(Game game) { this.game = game; }
 
